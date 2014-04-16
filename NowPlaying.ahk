@@ -25,6 +25,7 @@ If FileExist(settings_file)
 	path := ini_load(ini, settings_file)
 	lastfm_user := ini_getValue(ini, Settings, "User")
 	api_key := ini_getValue(ini, Settings, "API_Key")
+	Notification := ini_getValue(ini, Settings, "Notification")
 }
 Else
 {
@@ -97,7 +98,8 @@ GetSongInfo:
 		source := "Source: Recent Tracks"
 		URLDownloadToFile, % album_art_url, % album_art
 	}
-	Notify(Artist . " - " . Track, source,-4,"Style=Fast Image=" album_art)
+	if Notification
+		Notify(Artist . " - " . Track, source,-4,"Style=Fast Image=" album_art)
 	Return
 
 UnJson(string)
