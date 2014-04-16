@@ -49,9 +49,16 @@ CheckSong:
 		playing_formatted := "      " . playing
 		FileDelete %now_playing_file%
 		FileAppend, %playing_formatted%, %now_playing_file%, UTF-8
-		Sleep, 3000
-		GoSub, GetSongInfo
-		Menu, Tray, Tip, %Artist% - %Track%
+		if StrLen(was_playing) > 0
+		{
+			GoSub, GetSongInfo
+			Menu, Tray, Tip, %Artist% - %Track%
+		}
+		Else
+		{
+			Menu, Tray, Tip, Paused.
+		}
+		
 	}
 	Return
 
