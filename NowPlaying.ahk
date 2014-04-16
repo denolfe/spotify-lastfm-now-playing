@@ -8,8 +8,12 @@ SetTitleMatchMode, 2
 #Persistent
 OnExit, ExitSub
 
-Menu, Tray, Add
+Menu, Tray, NoStandard
+Menu, Tray, Add, Open Settings, OpenSettings
+Menu, Tray, Add, Reload Settings, LoadSettings
 Menu, Tray, Add, Debug, Debug
+Menu, Tray, Add
+Menu, Tray, Add, Exit, ExitSub
 
 ; Init Vars
 global Artist, Track
@@ -20,18 +24,7 @@ temp_json_file := "tmp\temp.json"
 artist_json_file := "tmp\artist.json"
 was_playing := ""
 
-If FileExist(settings_file)
-{
-	path := ini_load(ini, settings_file)
-	lastfm_user := ini_getValue(ini, Settings, "User")
-	api_key := ini_getValue(ini, Settings, "API_Key")
-	Notification := ini_getValue(ini, Settings, "Notification")
-}
-Else
-{
-	Msgbox, Config ini not found!
-	ExitApp
-}
+Gosub, LoadSettings
 
 SetTimer, CheckSong, 500
 Return
@@ -106,6 +99,25 @@ UnJson(string)
 {
 	return % RegExReplace(string, "\\/", "/")
 }
+
+OpenSettings:
+	Run % settings_file
+	Return
+
+LoadSettings:
+	If FileExist(settings_file)
+	{
+		path := ini_load(ini, settings_file)
+		lastfm_user := ini_getValue(ini, Settings, "User")
+		api_key := ini_getValue(ini, Settings, "API_Key")
+		Notification := ini_getValue(ini, Settings, "Notification")
+	}
+	Else
+	{
+		Msgbox, Config ini not found!
+		ExitApp
+	}
+	Return
 
 Debug:
     If (Debug := !Debug)
