@@ -92,7 +92,7 @@ GetSongInfo:
 		URLDownloadToFile, % album_art_url, % album_art
 	}
 	if Notification
-		Notify(Artist . " - " . Track, source,-4,"Style=Fast Image=" album_art)
+		Notify(Artist . " - " . Track, source,-4,"Style=Fast IW=128 IH=128 Image=" album_art)
 	Return
 
 UnJson(string)
