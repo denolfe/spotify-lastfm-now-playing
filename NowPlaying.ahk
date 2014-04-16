@@ -8,6 +8,9 @@ SetTitleMatchMode, 2
 #Persistent
 OnExit, ExitSub
 
+Menu, Tray, Add
+Menu, Tray, Add, Debug, Debug
+
 ; Init Vars
 global Artist, Track
 settings_file := "settings.ini"
@@ -16,7 +19,6 @@ album_art := "output\Cover.png"
 temp_json_file := "tmp\temp.json"
 artist_json_file := "tmp\artist.json"
 was_playing := ""
-debug := 0
 
 If FileExist(settings_file)
 {
@@ -61,21 +63,25 @@ GetSongInfo:
 	Artist := UnJson(json(j, "recenttracks.track[0].artist.#text"))
 	Track := UnJson(json(j, "recenttracks.track[0].name"))
 	album_art_url := UnJson(json(j, "recenttracks.track[0].image[3].#text"))
-
+	DebugLog(Artist . "`n" . Track . "`n" . album_art_url)
 	; If no album art found for song, try to retrieve from artist
 	If StrLen(album_art_url) < 1
 	{
+		DebugLog("Song track art not found.")
 		Url_Artist := "http://ws.audioscrobbler.com/2.0/?method=artist.getInfo&artist=" Artist "&api_key=" api_key "&format=json"
 		URLDownloadToFile, % Url_Artist , % artist_json_file
 		FileRead, a, % artist_json_file
 		album_art_url := UnJson(json(a, "artist.image[3].#text"))
 		If StrLen(album_art_url) < 1
 		{
+			DebugLog("Artist art found.")
 			URLDownloadToFile, % album_art_url, % album_art
-			source := "Source: Top Artist Albums"
+			source := "Source: Artist Info"
 		}
 		Else
 		{
+			DebugLog("No Art Found")
+			source := "Source: No Image Found"
 			FileCopy, img\Unknown.png, % album_art, 1
 		}
 	}
@@ -85,8 +91,6 @@ GetSongInfo:
 		URLDownloadToFile, % album_art_url, % album_art
 	}
 	Notify(Artist . " - " . Track, source,-4,"Style=Fast Image=" album_art)
-	if debug
-		Gosub, Debug
 	Return
 
 UnJson(string)
@@ -95,10 +99,14 @@ UnJson(string)
 }
 
 Debug:
-	Run % album_art
-	Traytip, Now Playing, %Artist% - %Track%, 1
-	clipboard := album_art_url
-	Return
+    If (Debug := !Debug)
+        Notify("Debugging Enabled",,-3,"Style=Warn")
+    else
+        Notify("Debugging Disabled",,-3,"Style=Warn")
+    Menu, Tray, ToggleCheck, Debug
+Return
+
+
 
 ExitSub:
 	FileDelete % album_art
@@ -111,3 +119,13 @@ ExitSub:
 #Include %A_ScriptDir%\lib\json.ahk
 #Include %A_ScriptDir%\lib\ini.ahk
 #Include %A_ScriptDir%\lib\Notify.ahk
+
+DebugLog(text)
+{
+	global
+	If Debug
+	{
+		FormatTime, Now,, M/dd [h:mm:ss]
+    	FileAppend, %Now%`n%text%`n, %NetworkFolder%debug.txt
+    }
+}
